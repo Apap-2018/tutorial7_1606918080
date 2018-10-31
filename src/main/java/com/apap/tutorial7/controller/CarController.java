@@ -28,19 +28,19 @@ public class CarController {
 	
 	@Autowired
 	private DealerService dealerService;
-	
+
 	@PostMapping()
 	private CarModel addCarSubmit(@RequestBody CarModel car) {
 		return carService.addCar(car);
 	}
-	
+
 	@GetMapping(value = "/{carId}")
 	private CarModel viewCar(@PathVariable ("carId") long carId, Model model) {
 		CarModel car = carService.getCarDetailById(carId);
 		car.setDealer(null);
 		return car;
 	}
-	
+
 	@GetMapping()
 	private List<CarModel> viewAllCar(Model model){
 		List<CarModel> listCar = carService.viewAllCar();
@@ -49,14 +49,14 @@ public class CarController {
 		}
 		return listCar;
 	}
-	
+
 	@DeleteMapping(value = "/{carId}")
 	private String deleteDealer(@PathVariable("carId") long carId, Model model) {
 		CarModel car = carService.getCarDetailById(carId);
 		carService.deleteCar(car);
 		return "car has been deleted";
 	}
-	
+
 	@PutMapping(value = "/{carId}")
 	private String updateCarSubmit(
 			@PathVariable (value = "carId") long carId,
@@ -66,16 +66,25 @@ public class CarController {
 			@RequestParam ("amount") String amount,
 			@RequestParam ("dealerID") String dealerID) {
 		CarModel car = (CarModel)carService.getCarDetailById(carId);
-		DealerModel dealer = (DealerModel) dealerService.getDealerDetailById(Long.parseLong(dealerID)).get();
+        if(brand != null) {
+            car.setBrand(brand);
+        }
+        if (type!= null) {
+            car.setType(type);
+        }
+        if (price!=null) {
+            car.setPrice(Long.parseLong(price));
+        }
+        if(amount!=null) {
+            car.setAmount(Integer.parseInt(amount));
+        }
+        if (dealerID!=null) {
+            DealerModel dealer = (DealerModel) dealerService.getDealerDetailById(Long.parseLong(dealerID)).get();
+            car.setDealer(dealer);
+        }
 		if(car.equals(null)) {
 			return "Couldn't find your car";
 		}
-		car.setBrand(brand);
-		car.setType(type);
-		car.setPrice(Long.parseLong(price));
-		car.setAmount(Integer.parseInt(amount));
-		car.setId(carId);
-		car.setDealer(dealer);
 		carService.updateCar(carId, car);
 		return "update success";
 	}
